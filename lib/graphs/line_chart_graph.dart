@@ -139,7 +139,7 @@ class _LineChartGraphState extends State<LineChartGraph> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        "12",
+                        "5",
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w400,
@@ -165,7 +165,7 @@ class _LineChartGraphState extends State<LineChartGraph> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        "20",
+                        "15",
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w400,

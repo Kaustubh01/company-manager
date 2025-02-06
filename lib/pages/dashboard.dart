@@ -74,7 +74,7 @@ class _DashboardState extends State<Dashboard> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Image.asset('assets/images/logo.png'),
+              child: Icon(Icons.flash_on),
             ),
             ListTile(
               title: Text('Sales'),
