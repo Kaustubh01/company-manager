@@ -68,85 +68,69 @@ class _LoginState extends State<Login> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal:
-                screenWidth > 600 ? 80.0 : 24.0, // More margin on large screens
+            horizontal: screenWidth > 600 ? 80.0 : 24.0, // More margin on large screens
             vertical: 32.0,
           ),
-          child: Card(
-            elevation: 6,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 400, // Maximum width of the form
-                  maxHeight: 500,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      "Login",
-                      style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'OpenSans'),
-                    ),
-                    SizedBox(height: 30),
-                    Container(
-                      margin: EdgeInsets.symmetric(vertical: 8.0),
-                      child: TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          labelText: 'Your Email',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Your Password',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                      obscureText: true,
-                    ),
-                    SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: () {
-                        _saveCredentials(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple, // Button color
-                        foregroundColor: Colors.white, // Text color
-                        padding: EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 40), // Increased padding
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: Text("Login",
-                          style:
-                              TextStyle(fontSize: 18)), // Increased font size
-                    ),
-                    SizedBox(height: 30),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => CreateBusiness()));
-                      },
-                      child: Text("Or Create Your Business Here"),
-                    ),
-                  ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                "Login",
+                style: TextStyle(
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'OpenSans'),
+              ),
+              SizedBox(height: 30),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 8.0),
+                child: TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Your Email',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
                 ),
               ),
-            ),
+              SizedBox(height: 30),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Your Password',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                obscureText: true,
+              ),
+              SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {
+                  _saveCredentials(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple, // Button color
+                  foregroundColor: Colors.white, // Text color
+                  padding: EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 40), // Increased padding
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text("Login",
+                    style: TextStyle(fontSize: 18)), // Increased font size
+              ),
+              SizedBox(height: 30),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => CreateBusiness()));
+                },
+                child: Text("Or Create Your Business Here"),
+              ),
+            ],
           ),
         ),
       ),

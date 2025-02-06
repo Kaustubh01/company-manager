@@ -106,89 +106,64 @@ class _SignupState extends State<Signup> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal:
-                screenWidth > 600 ? 80.0 : 24.0, // More margin on large screens
+            horizontal: screenWidth > 600 ? 80.0 : 24.0,
             vertical: 32.0,
           ),
-          child: Card(
-            elevation: 6,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 400, // Maximum width of the form
-                  maxHeight: 500,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      "Create Account",
-                      style: TextStyle(
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'OpenSans'),
-                    ),
-                    const SizedBox(height: 30),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: TextField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Your Name',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: TextField(
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                          labelText: 'Your Email',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: TextField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          labelText: 'Your Password',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
-                        obscureText: true,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () => _createAccount(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple, // Button color
-                              foregroundColor: Colors.white, // Text color
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                  horizontal: 40), // Increased padding
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: const Text("Create Account"),
-                          ),
-                  ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                "Create Account",
+                style: TextStyle(
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'OpenSans'),
+              ),
+              const SizedBox(height: 30),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Your Name',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
-            ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Your Email',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Your Password',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 24),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () => _createAccount(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple, // Button color
+                        foregroundColor: Colors.white, // Text color
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 40),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text("Create Account"),
+                    ),
+            ],
           ),
         ),
       ),

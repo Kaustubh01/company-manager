@@ -87,71 +87,57 @@ class _CreateBusinessState extends State<CreateBusiness> {
             horizontal: screenWidth > 600 ? 80.0 : 24.0,
             vertical: 32.0,
           ),
-          child: Card(
-            elevation: 6,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                  maxHeight: 500,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Text(
-                      "Create Business",
-                      style: TextStyle(
-                          fontSize: 24.0, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 30),
-                    TextField(
-                      controller: _businessNameController,
-                      decoration: InputDecoration(
-                        labelText: 'Business Name',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    TextField(
-                      controller: _businessTypeController,
-                      decoration: InputDecoration(
-                        labelText: 'Business Type',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () {
-                              final name = _businessNameController.text.trim();
-                              final type = _businessTypeController.text.trim();
-                              if (name.isNotEmpty && type.isNotEmpty) {
-                                _createBusiness(name, type);
-                              } else {
-                                _showErrorDialog("Please fill in all fields.");
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 40),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: const Text("Create Business",
-                                style: TextStyle(fontSize: 18)),
-                          ),
-                  ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Text(
+                "Create Business",
+                style: TextStyle(
+                    fontSize: 24.0, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 30),
+              TextField(
+                controller: _businessNameController,
+                decoration: InputDecoration(
+                  labelText: 'Business Name',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
               ),
-            ),
+              const SizedBox(height: 30),
+              TextField(
+                controller: _businessTypeController,
+                decoration: InputDecoration(
+                  labelText: 'Business Type',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+              const SizedBox(height: 30),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () {
+                        final name = _businessNameController.text.trim();
+                        final type = _businessTypeController.text.trim();
+                        if (name.isNotEmpty && type.isNotEmpty) {
+                          _createBusiness(name, type);
+                        } else {
+                          _showErrorDialog("Please fill in all fields.");
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 40),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text("Create Business",
+                          style: TextStyle(fontSize: 18)),
+                    ),
+            ],
           ),
         ),
       ),
