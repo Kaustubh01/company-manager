@@ -51,6 +51,8 @@ class _EmployeeState extends State<Employee> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Employees"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white, 
         actions: [
           IconButton(
             onPressed: () {
@@ -65,10 +67,16 @@ class _EmployeeState extends State<Employee> {
       ),
       body: _employees.isEmpty
           ? Center(
-              child: ElevatedButton(
-                onPressed: _getEmployees,
-                child: Text("Add Employee"),
-              ),
+                child: Card(
+                color: Colors.blue,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                  "Add Employee",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+                ),
             )
           : Padding(
               padding: const EdgeInsets.all(8.0),
@@ -118,10 +126,11 @@ class _EmployeeState extends State<Employee> {
               ),
             ),
       floatingActionButton: _employees.isNotEmpty
-          ? FloatingActionButton(
+            ? FloatingActionButton(
               onPressed: _getEmployees,
               tooltip: 'Add Employee',
-              child: Icon(Icons.add),
+              backgroundColor: Colors.blue.shade500,
+              child: Icon(Icons.add, color: Colors.white),
             )
           : null,
     );

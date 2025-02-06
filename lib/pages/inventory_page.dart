@@ -135,7 +135,11 @@ class _InventoryPageState extends State<InventoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Inventory")),
+      appBar: AppBar(
+        title: Text("Inventory"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+        ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : items.isEmpty

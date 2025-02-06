@@ -68,73 +68,116 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Dashboard"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Image.asset('assets/images/logo.png'),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade300, Colors.blue.shade900],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            ListTile(
-              title: Text('Sales'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SalesPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Employees'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Employee()),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Customers'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CustomerPage()),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Inventory'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InventoryPage()),
-                );
-              },
-            ),
-            // Add the logout button at the bottom
-            ListTile(
-              title: Text(
-                'Logout',
-                style: TextStyle(color: Colors.white),
+            color: Colors.white,
+          ),
+          child: Column(
+            children: [
+              DrawerHeader(
+                // decoration: BoxDecoration(
+                //   color: Colors.blue.shade700,
+                // ),
+                child: Center(
+                  child: Text(
+                    'BizMaster',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
               ),
-              tileColor: Colors.red,
-              onTap: () async {
-                final storage = FlutterSecureStorage();
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    ListTile(
+                      title: Text(
+                        'Sales',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      tileColor: Colors.transparent,
+                      hoverColor: Colors.orange.shade600,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SalesPage()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      title: Text('Employees',
+                          style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Employee()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      title: Text('Customers',
+                          style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CustomerPage()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      title: Text('Inventory',
+                          style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => InventoryPage()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: ListTile(
+                  leading: Icon(Icons.logout, color: Colors.white),
+                  title: Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  tileColor: Colors.orange.shade600,
+                  hoverColor: Colors.orange.shade400,
+                  onTap: () async {
+                    final storage = FlutterSecureStorage();
 
-                // Clear all stored data
-                await storage.deleteAll();
+                    // Clear all stored data
+                    await storage.deleteAll();
 
-                // Optionally, navigate to the login page or home page after logout
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          Login()), // Adjust this to your login page
-                );
-              },
-            ),
-          ],
+                    // Optionally, navigate to the login page or home page after logout
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              Login()), // Adjust this to your login page
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: salesData.isEmpty

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:attendance/comon.dart';
+import 'package:attendance/pages/login.dart';
 import 'package:attendance/pages/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,13 +13,42 @@ class CreateBusiness extends StatefulWidget {
   State<CreateBusiness> createState() => _CreateBusinessState();
 }
 
-class _CreateBusinessState extends State<CreateBusiness> {
+class _CreateBusinessState extends State<CreateBusiness>
+    with SingleTickerProviderStateMixin {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final TextEditingController _businessNameController = TextEditingController();
   final TextEditingController _businessTypeController = TextEditingController();
+  late AnimationController _controller;
+  late Animation<double> _fadeInAnimation;
   bool _isLoading = false;
 
-  Future<void> _createBusiness(String name, String type) async {
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _fadeInAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _controller.forward();
+  }
+
+  // @override
+  // void dispose() {
+  //   _controller.dispose();
+  //   super.dispose();
+  // }
+
+  Future<void> _createBusiness(BuildContext context) async {
+    String name = _businessNameController.text.trim();
+    String type = _businessTypeController.text.trim();
+
+    if (name.isEmpty || type.isEmpty) {
+      _showErrorDialog("Please fill in all fields.");
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -39,10 +69,6 @@ class _CreateBusinessState extends State<CreateBusiness> {
         await _storage.write(key: 'business-name', value: name);
         await _storage.write(key: 'business-type', value: type);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Business created successfully!')),
-        );
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const Signup()),
@@ -51,7 +77,7 @@ class _CreateBusinessState extends State<CreateBusiness> {
         _showErrorDialog("Failed to create business. Please try again.");
       }
     } catch (e) {
-      _showErrorDialog("An error occurred: $e");
+      _showErrorDialog("An error occurred, please try again.");
     } finally {
       setState(() {
         _isLoading = false;
@@ -60,18 +86,8 @@ class _CreateBusinessState extends State<CreateBusiness> {
   }
 
   void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Error"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -80,76 +96,123 @@ class _CreateBusinessState extends State<CreateBusiness> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: screenWidth > 600 ? 80.0 : 24.0,
-            vertical: 32.0,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade300, Colors.blue.shade900],
           ),
-          child: Card(
-            elevation: 6,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: Center(
+          child: FadeTransition(
+            opacity: _fadeInAnimation,
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                  maxHeight: 500,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Text(
-                      "Create Business",
-                      style: TextStyle(
-                          fontSize: 24.0, fontWeight: FontWeight.bold),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth > 600 ? 80.0 : 24.0,
+                vertical: 32.0,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text(
+                    "Create Your Business",
+                    style: TextStyle(
+                      fontSize: 32.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 30),
-                    TextField(
-                      controller: _businessNameController,
-                      decoration: InputDecoration(
-                        labelText: 'Business Name',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                  ),
+                  const SizedBox(height: 30),
+                  TextField(
+                    controller: _businessNameController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      labelText: 'Business Name',
+                      hintText: 'Enter your business name',
+                      labelStyle: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.normal),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.black),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    TextField(
-                      controller: _businessTypeController,
-                      decoration: InputDecoration(
-                        labelText: 'Business Type',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _businessTypeController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      labelText: 'Business Type',
+                      hintText: 'Enter your business type',
+                      labelStyle: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.normal),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.black),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      floatingLabelStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : ElevatedButton(
-                            onPressed: () {
-                              final name = _businessNameController.text.trim();
-                              final type = _businessTypeController.text.trim();
-                              if (name.isNotEmpty && type.isNotEmpty) {
-                                _createBusiness(name, type);
-                              } else {
-                                _showErrorDialog("Please fill in all fields.");
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 40),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
-                            ),
-                            child: const Text("Create Business",
-                                style: TextStyle(fontSize: 18)),
+                  ),
+                  const SizedBox(height: 30),
+                  _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: () => _createBusiness(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade600,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 40),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                  ],
-                ),
+                          child: const Text("Create Business",
+                              style: TextStyle(fontSize: 18)),
+                        ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already have a business ?",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => Login()),
+                        ),
+                        child: Text(
+                          "Login...",
+                          style: TextStyle(
+                              color: Colors.orange.shade600,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),

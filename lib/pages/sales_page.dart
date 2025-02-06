@@ -81,7 +81,11 @@ class _SalesPageState extends State<SalesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sales Data")),
+      appBar: AppBar(
+        title: const Text("Sales Data"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+        ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : salesData.isEmpty

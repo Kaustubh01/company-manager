@@ -11,14 +11,29 @@ class Signup extends StatefulWidget {
   State<Signup> createState() => _SignupState();
 }
 
-class _SignupState extends State<Signup> {
+class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  late AnimationController _controller;
+  late Animation<double> _fadeInAnimation;
+  String? _emailError;
 
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 2000),
+    );
+    _fadeInAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _controller.forward();
+  }
 
   Future<void> _createAccount(BuildContext context) async {
     setState(() {
@@ -77,6 +92,11 @@ class _SignupState extends State<Signup> {
     }
   }
 
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(email);
+  }
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -101,7 +121,8 @@ class _SignupState extends State<Signup> {
       backgroundColor: Colors.grey[200], // Light background
       appBar: AppBar(
         title: const Text("Sign Up"),
-        backgroundColor: Colors.purple, // AppBar color
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white, // AppBar color
       ),
       body: Center(
         child: Padding(
@@ -110,16 +131,13 @@ class _SignupState extends State<Signup> {
                 screenWidth > 600 ? 80.0 : 24.0, // More margin on large screens
             vertical: 32.0,
           ),
-          child: Card(
-            elevation: 6,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 400, // Maximum width of the form
-                  maxHeight: 500,
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeInAnimation,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth > 600 ? 80.0 : 24.0,
+                  vertical: 32.0,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -137,9 +155,23 @@ class _SignupState extends State<Signup> {
                       child: TextField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Your Name',
+                          labelText: 'Name',
+                          hintText: 'Enter your name',
+                          labelStyle: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.normal),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ),
@@ -149,9 +181,24 @@ class _SignupState extends State<Signup> {
                       child: TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          labelText: 'Your Email',
+                          labelText: 'Email address',
+                          hintText: 'Enter your email address',
+                          labelStyle: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.normal),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          errorText: _emailError,
+                          floatingLabelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                         keyboardType: TextInputType.emailAddress,
                       ),
@@ -162,9 +209,25 @@ class _SignupState extends State<Signup> {
                       child: TextField(
                         controller: _passwordController,
                         decoration: InputDecoration(
-                          labelText: 'Your Password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          labelStyle: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.normal),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                         obscureText: true,
                       ),
@@ -175,15 +238,15 @@ class _SignupState extends State<Signup> {
                         : ElevatedButton(
                             onPressed: () => _createAccount(context),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple, // Button color
+                              backgroundColor: Colors.orange.shade600, // Button color
                               foregroundColor: Colors.white, // Text color
                               padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                   horizontal: 40), // Increased padding
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)),
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: const Text("Create Account"),
+                            child: const Text("Create Account", style: TextStyle(fontSize: 24)),
                           ),
                   ],
                 ),
