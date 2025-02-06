@@ -7,7 +7,7 @@ class CircularChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, Color> Labels = {
-      'Repeating Customers': Color(0xFF3A0CA3),
+      'Repeating Customers': Colors.blue.shade500,
       'New Customers': Colors.grey
     };
 
@@ -42,7 +42,7 @@ class CircularChart extends StatelessWidget {
                               RangePointer(
                                 value: 20,
                                 cornerStyle: CornerStyle.bothCurve,
-                                color: Color(0xFF3A0CA3),
+                                color: Colors.blue.shade500,
                                 width: 30,
                               ),
                             ],

@@ -229,7 +229,11 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Employee Details")),
+      appBar: AppBar(
+        title: const Text("Employee Details"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+        ),
       body: Center(
         child: isLoading
             ? const CircularProgressIndicator()
@@ -241,7 +245,8 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
         onPressed: () {
           _showTaskDialog(context);
         },
-        child: Icon(Icons.add_task),
+        backgroundColor: Colors.blue.shade500,
+        child: Icon(Icons.add_task, color: Colors.white),
       ),
     );
   }
@@ -256,104 +261,103 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
 
     bool isPresentToday = serverDateFormatted == today;
 
-    return Card(
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      employee!["name"],
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(employee!["role"],
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey)),
-                    const SizedBox(height: 4),
-                    Text(employee!["email"],
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.grey)),
-                  ],
-                ),
-                CircleAvatar(
-                  radius: 10,
-                  backgroundColor: isPresentToday ? Colors.green : Colors.red,
-                ),
-              ],
+            Text(
+            employee!["name"],
+            style: const TextStyle(
+              fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const Divider(height: 20, thickness: 1),
-            ListTile(
-              title: const Text("Salary"),
-              subtitle: Text(employee!["salary"].toString()),
-              leading: const Icon(Icons.attach_money, color: Colors.green),
-              onTap: () async {
-                double? newSalary = await _showSalaryUpdateDialog();
-                if (newSalary != null) {
-                  _updateSalary(newSalary);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text("Attendance"),
-              subtitle: Text(employee!["attendance"].toString()),
-              leading: const Icon(Icons.calendar_today, color: Colors.blue),
-              onTap: () {},
-            ),
-            Text("Tasks", style: TextStyle(fontSize: 18),),
-            const Divider(height: 20, thickness: 1), // Divider before tasks
-            if (tasks.isEmpty)
-              const Text("No tasks available.")
-            else
-              ...tasks.map((task) => ListTile(
-                    title: Text(task["title"]),
-                    leading: const Icon(Icons.task),
-                    onTap: (){
-                      showDialog(context: context, builder: (context){
-                        return AlertDialog(
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Title: ${task["title"]}",
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text("${task["description"]}"),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        "Due Date: ${task["dueDate"] ?? "None"}",
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text("Status: ${task["status"]}"),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      });
-                    },
-                  )),
+            const SizedBox(height: 4),
+            Text(employee!["role"],
+              style: const TextStyle(fontSize: 16, color: Colors.black54)),
+            const SizedBox(height: 4),
+            Text(employee!["email"],
+              style: const TextStyle(fontSize: 14, color: Colors.black54)),
           ],
+          ),
+          CircleAvatar(
+          radius: 10,
+          backgroundColor: isPresentToday ? Colors.green : Colors.red,
+          ),
+        ],
         ),
+        const Divider(height: 20, thickness: 1),
+        ListTile(
+        title: const Text("Salary"),
+        subtitle: Text(employee!["salary"].toString()),
+        leading: const Icon(Icons.attach_money, color: Colors.green),
+        onTap: () async {
+          double? newSalary = await _showSalaryUpdateDialog();
+          if (newSalary != null) {
+          _updateSalary(newSalary);
+          }
+        },
+        ),
+        ListTile(
+        title: const Text("Attendance"),
+        subtitle: Text(employee!["attendance"].toString()),
+        leading: const Icon(Icons.calendar_today, color: Colors.blue),
+        onTap: () {},
+        ),
+        const SizedBox(height: 16),
+        Text("Tasks", style: TextStyle(fontSize: 18)),
+        const Divider(height: 20, thickness: 1),
+        if (tasks.isEmpty)
+        const Text("No tasks available.")
+        else
+        ...tasks.map((task) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: ListTile(
+            title: Text(task["title"]),
+            leading: const Icon(Icons.task),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                return AlertDialog(
+                  content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                      children: [
+                      Text(
+                        "Title: ${task["title"]}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text("${task["description"]}"),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Due Date: ${task["dueDate"] ?? "None"}",
+                      ),
+                      const SizedBox(height: 8),
+                      Text("Status: ${task["status"]}"),
+                      ],
+                    ),
+                    ),
+                  ],
+                  ),
+                );
+                });
+            },
+            ),
+          )),
+      ],
       ),
     );
   }

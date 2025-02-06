@@ -81,35 +81,38 @@ class _EmployeeState extends State<Employee> {
         TextEditingController passwordController = TextEditingController();
 
         return AlertDialog(
-          title: Text("Add Employee"),
+          title: Text(
+            "Add Employee",
+            style: TextStyle(color: Colors.orange),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: "Name"),
-                keyboardType: TextInputType.text,
+          controller: nameController,
+          decoration: InputDecoration(labelText: "Name"),
+          keyboardType: TextInputType.text,
               ),
               TextField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: "Email"),
-                keyboardType: TextInputType.emailAddress,
+          controller: emailController,
+          decoration: InputDecoration(labelText: "Email"),
+          keyboardType: TextInputType.emailAddress,
               ),
               TextField(
-                controller: roleController,
-                decoration: InputDecoration(labelText: "Role"),
-                keyboardType: TextInputType.text,
+          controller: roleController,
+          decoration: InputDecoration(labelText: "Role"),
+          keyboardType: TextInputType.text,
               ),
               TextField(
-                controller: departmentController,
-                decoration: InputDecoration(labelText: "Department"),
-                keyboardType: TextInputType.text,
+          controller: departmentController,
+          decoration: InputDecoration(labelText: "Department"),
+          keyboardType: TextInputType.text,
               ),
               TextField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: "Password"),
-                obscureText: true,
-                keyboardType: TextInputType.visiblePassword,
+          controller: passwordController,
+          decoration: InputDecoration(labelText: "Password"),
+          obscureText: true,
+          keyboardType: TextInputType.visiblePassword,
               ),
             ],
           ),
@@ -117,19 +120,24 @@ class _EmployeeState extends State<Employee> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text("Cancel"),
+              style: TextButton.styleFrom(foregroundColor: Colors.blue.shade500),
             ),
             ElevatedButton(
               onPressed: () {
-                _addEmployee(
-                  nameController.text,
-                  emailController.text,
-                  roleController.text,
-                  departmentController.text,
-                  passwordController.text,
-                );
-                Navigator.pop(context);
+          _addEmployee(
+            nameController.text,
+            emailController.text,
+            roleController.text,
+            departmentController.text,
+            passwordController.text,
+          );
+          Navigator.pop(context);
               },
               child: Text("Add"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade500, 
+                foregroundColor: Colors.white
+                ),
             ),
           ],
         );
