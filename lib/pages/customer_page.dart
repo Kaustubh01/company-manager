@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'package:attendance/comon.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:attendance/comon.dart'; // Assuming you have this for `baseurl`
 
 class CustomerPage extends StatefulWidget {
   const CustomerPage({super.key});
@@ -13,10 +14,25 @@ class CustomerPage extends StatefulWidget {
 class _CustomerPageState extends State<CustomerPage> {
   List<Map<String, dynamic>> customerData = [];
   bool isLoading = true;
+  final FlutterSecureStorage _storage = FlutterSecureStorage(); // For secure storage access
 
   // Fetch customer data from the API
   Future<void> _getCustomers() async {
-    final url = Uri.parse('$baseurl/customer');
+    // Read the business ID from secure storage
+    String? businessId = await _storage.read(key: 'business-id');
+
+    if (businessId == null) {
+      // Handle case where businessId is not available
+      print("No business ID found in secure storage");
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    // Build the URL with the businessId
+    final url = Uri.parse('$baseurl/customers/$businessId');
+
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -77,7 +93,7 @@ class _CustomerPageState extends State<CustomerPage> {
                             ElevatedButton(
                               onPressed: () {},
                               style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.lightBlueAccent),
+                                backgroundColor: WidgetStateProperty.all(Colors.lightBlueAccent),
                               ),
                               child: Text("Email", style: TextStyle(color: Colors.white)),
                             ),

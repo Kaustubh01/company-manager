@@ -15,25 +15,32 @@ class Employee extends StatefulWidget {
 }
 
 class _EmployeeState extends State<Employee> {
-final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
   List<Map<String, dynamic>> _employees = [];
 
+  // Group employees by department
+  Map<String, List<Map<String, dynamic>>> groupedEmployees = {};
 
-  Future<void> _showAddEmployeeDialog() async {
-    TextEditingController nameController = TextEditingController();
-    TextEditingController emailController = TextEditingController();
-    TextEditingController roleController = TextEditingController();
-    TextEditingController departmentController = TextEditingController(); // Added department controller
+ Future<void> _showAddEmployeeDialog() async {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController roleController = TextEditingController();
+  TextEditingController departmentController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Add Employee"),
-            content: SizedBox(
-              height: 240, // Increased height to fit department field
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Add Employee"),
+        content: SingleChildScrollView(  // Make the content scrollable
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,  // Limit the height of the dialog
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextField(
                     controller: nameController,
@@ -49,36 +56,49 @@ final FlutterSecureStorage _storage = FlutterSecureStorage();
                     decoration: InputDecoration(labelText: "Role"),
                   ),
                   TextField(
-                    controller: departmentController, // Department input
+                    controller: departmentController,
                     decoration: InputDecoration(labelText: "Department"),
+                  ),
+                  TextField(
+                    controller: passwordController,
+                    decoration: InputDecoration(labelText: "Password"),
+                    keyboardType: TextInputType.visiblePassword,
                   ),
                 ],
               ),
             ),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Cancel")),
-              ElevatedButton(
-                  onPressed: () {
-                    _addEmployee(
-                      nameController.text,
-                      emailController.text,
-                      roleController.text,
-                      departmentController.text, // Pass department field
-                    );
-                    _getEmployees();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Add"))
-            ],
-          );
-        });
-  }
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _addEmployee(
+                nameController.text,
+                emailController.text,
+                roleController.text,
+                departmentController.text,
+                passwordController.text,
+              );
+              _getEmployees();
+              Navigator.of(context).pop();
+            },
+            child: Text("Add"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
-  Future<void> _addEmployee(String name, String email, String role, String department) async {
+
+
+  Future<void> _addEmployee(String name, String email, String role, String department, String password) async {
     String? businessId = await _storage.read(key: 'business-id');
     final url = Uri.parse('$baseurl/business/$businessId/employees/create');
 
@@ -88,10 +108,12 @@ final FlutterSecureStorage _storage = FlutterSecureStorage();
           'name': name,
           'email': email,
           'role': role,
-          'department': department, // Include department in the body
+          'department': department,
+          'password': password// Include department in the body
         }));
     if (response.statusCode == 201) {
       print("Employee added successfully");
+      _getEmployees();
     } else {
       print("Failed to add employee");
     }
@@ -99,15 +121,23 @@ final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   Future<void> _getEmployees() async {
     String? businessId = await _storage.read(key: 'business-id');
-    final url = Uri.parse('$baseurl/business/$businessId/employees'); // Adjust URL if needed
-    final response =
-        await http.get(url, headers: {'Content-Type': 'application/json'});
+    final url = Uri.parse('$baseurl/business/$businessId/employees');
+    final response = await http.get(url, headers: {'Content-Type': 'application/json'});
 
     if (response.statusCode == 200) {
       List<dynamic> employees = jsonDecode(response.body);
       setState(() {
-        _employees =
-            employees.map((e) => Map<String, dynamic>.from(e)).toList();
+        _employees = employees.map((e) => Map<String, dynamic>.from(e)).toList();
+
+        // Group employees by department
+        groupedEmployees = {};
+        for (var employee in _employees) {
+          String department = employee['department'] ?? 'Unknown';
+          if (!groupedEmployees.containsKey(department)) {
+            groupedEmployees[department] = [];
+          }
+          groupedEmployees[department]!.add(employee);
+        }
       });
       print("Employees fetched successfully: $employees");
     } else {
@@ -118,54 +148,85 @@ final FlutterSecureStorage _storage = FlutterSecureStorage();
   @override
   void initState() {
     super.initState();
-    _getEmployees(); // Fetch employees when the page is opened
+    _getEmployees();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Employees"),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => QrScanner()),
-                  );
-                },
-                icon: Icon(Icons.qr_code))
-          ],
-        ),
-        body: Center(
-            child: _employees.isEmpty
-                ? ElevatedButton(
-                    onPressed: _showAddEmployeeDialog,
-                    child: Text("Add Employee"))
-                : ListView.builder(
-                    itemCount: _employees.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_employees[index]['name']),
-                        subtitle: Text(_employees[index]['role']),
-                        onTap: () {
-                          int empId = _employees[index]['id'];
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ViewEmployeeDetails(
-                                      id: empId,
-                                    )),
+      appBar: AppBar(
+        title: Text("Employees"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => QrScanner()),
+              );
+            },
+            icon: Icon(Icons.qr_code),
+          )
+        ],
+      ),
+      body: Center(
+        child: _employees.isEmpty
+            ? ElevatedButton(
+                onPressed: _showAddEmployeeDialog,
+                child: Text("Add Employee"),
+              )
+            : ListView.builder(
+                itemCount: groupedEmployees.keys.length,
+                itemBuilder: (context, index) {
+                  String department = groupedEmployees.keys.elementAt(index);
+                  List<Map<String, dynamic>> employeesInDepartment =
+                      groupedEmployees[department]!;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Department Title
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          department,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      // List of employees in this department
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: employeesInDepartment.length,
+                        itemBuilder: (context, empIndex) {
+                          return ListTile(
+                            title: Text(employeesInDepartment[empIndex]['name']),
+                            subtitle: Text(employeesInDepartment[empIndex]['role']),
+                            onTap: () {
+                              int empId = employeesInDepartment[empIndex]['id'];
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ViewEmployeeDetails(
+                                    id: empId,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    })),
-        floatingActionButton: _employees.isNotEmpty
-            ? FloatingActionButton(
-                onPressed: _showAddEmployeeDialog,
-                tooltip: 'Add Employee',
-                child: Icon(Icons.add),
-              )
-            : null);
+                      ),
+                    ],
+                  );
+                },
+              ),
+      ),
+      floatingActionButton: _employees.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: _showAddEmployeeDialog,
+              tooltip: 'Add Employee',
+              child: Icon(Icons.add),
+            )
+          : null,
+    );
   }
 }

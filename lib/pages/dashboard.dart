@@ -21,19 +21,38 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   List<Map<String, dynamic>> salesData = [];
-  Future<void> _getSales() async {
-    final url = Uri.parse('$baseurl/sales');
+  bool isLoading = true;
+
+  // Initialize secure storage
+  final _storage = FlutterSecureStorage();
+   Future<void> _getSales() async {
+    // Read business ID from secure storage
+    String? businessId = await _storage.read(key: 'business-id');
+    print('buisness id $businessId');
+    if (businessId == null) {
+      print("Business ID is not available in secure storage.");
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    final url = Uri.parse('$baseurl/sales/$businessId');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         setState(() {
+          print("Sales data is $response.body");
           salesData = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+          isLoading = false;
         });
       } else {
-        print("Error fetching sales data");
+        print("Error fetching sales data: ${response.statusCode}");
+        setState(() => isLoading = false);
       }
     } catch (e) {
       print("Error fetching sales data: $e");
+      setState(() => isLoading = false);
     }
   }
   @override
