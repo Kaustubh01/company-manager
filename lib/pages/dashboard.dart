@@ -78,6 +78,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             ListTile(
               title: Text('Sales'),
+              trailing: Icon(Icons.bar_chart),
               onTap: () {
                 Navigator.push(
                   context,
@@ -87,6 +88,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             ListTile(
               title: Text('Employees'),
+              trailing: Icon(Icons.person_2),
               onTap: () {
                 Navigator.push(
                   context,
@@ -96,6 +98,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             ListTile(
               title: Text('Customers'),
+              trailing: Icon(Icons.person_3),
               onTap: () {
                 Navigator.push(
                   context,
@@ -105,6 +108,7 @@ class _DashboardState extends State<Dashboard> {
             ),
             ListTile(
               title: Text('Inventory'),
+              trailing: Icon(Icons.warehouse),
               onTap: () {
                 Navigator.push(
                   context,
@@ -114,11 +118,11 @@ class _DashboardState extends State<Dashboard> {
             ),
             // Add the logout button at the bottom
             ListTile(
+              trailing: Icon(Icons.logout),
               title: Text(
                 'Logout',
-                style: TextStyle(color: Colors.white),
               ),
-              tileColor: Colors.red,
+              
               onTap: () async {
                 final storage = FlutterSecureStorage();
 
