@@ -30,7 +30,10 @@ class _SignupState extends State<Signup> {
     String password = _passwordController.text.trim();
     String? businessId = await _storage.read(key: 'business-id');
 
-    if (name.isEmpty || email.isEmpty ||  password.isEmpty || businessId == null) {
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        businessId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill in all fields")),
       );
@@ -62,7 +65,8 @@ class _SignupState extends State<Signup> {
         Navigator.pop(context);
       } else {
         final errorResponse = jsonDecode(response.body);
-        _showErrorDialog(errorResponse['error'] ?? "Error creating account. Try again.");
+        _showErrorDialog(
+            errorResponse['error'] ?? "Error creating account. Try again.");
       }
     } catch (e) {
       _showErrorDialog("An error occurred: $e");
@@ -91,37 +95,101 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Your Name'),
+      backgroundColor: Colors.grey[200], // Light background
+      appBar: AppBar(
+        title: const Text("Sign Up"),
+        backgroundColor: Colors.purple, // AppBar color
+      ),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal:
+                screenWidth > 600 ? 80.0 : 24.0, // More margin on large screens
+            vertical: 32.0,
+          ),
+          child: Card(
+            elevation: 6,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 400, // Maximum width of the form
+                  maxHeight: 500,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      "Create Account",
+                      style: TextStyle(
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'OpenSans'),
+                    ),
+                    const SizedBox(height: 30),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Your Name',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Your Email',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Your Password',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                        obscureText: true,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: () => _createAccount(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.purple, // Button color
+                              foregroundColor: Colors.white, // Text color
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 40), // Increased padding
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: const Text("Create Account"),
+                          ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Your Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Your Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 24),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: () => _createAccount(context),
-                    child: const Text("Create Account"),
-                  ),
-          ],
+          ),
         ),
       ),
     );

@@ -14,15 +14,14 @@ class CustomerPage extends StatefulWidget {
 class _CustomerPageState extends State<CustomerPage> {
   List<Map<String, dynamic>> customerData = [];
   bool isLoading = true;
-  final FlutterSecureStorage _storage = FlutterSecureStorage(); // For secure storage access
+  final FlutterSecureStorage _storage =
+      FlutterSecureStorage(); // For secure storage access
 
   // Fetch customer data from the API
   Future<void> _getCustomers() async {
-    // Read the business ID from secure storage
     String? businessId = await _storage.read(key: 'business-id');
 
     if (businessId == null) {
-      // Handle case where businessId is not available
       print("No business ID found in secure storage");
       setState(() {
         isLoading = false;
@@ -30,14 +29,14 @@ class _CustomerPageState extends State<CustomerPage> {
       return;
     }
 
-    // Build the URL with the businessId
     final url = Uri.parse('$baseurl/customers/$businessId');
 
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         setState(() {
-          customerData = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+          customerData =
+              List<Map<String, dynamic>>.from(jsonDecode(response.body));
           isLoading = false;
         });
       } else {
@@ -59,50 +58,98 @@ class _CustomerPageState extends State<CustomerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Customers"),
-      ),
+      appBar: AppBar(title: Text("Customers")),
       body: isLoading
-          ? Center(child: CircularProgressIndicator()) // Show a loading spinner if still fetching data
+          ? Center(child: CircularProgressIndicator())
           : customerData.isEmpty
-              ? Center(child: Text("No customers available", style: TextStyle(fontSize: 18))) // Show "No customers available" message
-              : ListView.builder(
-                  itemCount: customerData.length,
-                  itemBuilder: (context, index) {
-                    final customer = customerData[index];
-
-                    return Card(
-                      margin: EdgeInsets.all(8.0),
-                      elevation: 5.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              customer['name'] ?? 'No name',
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text('Email: ${customer['email'] ?? 'No email'}'),
-                            SizedBox(height: 4.0),
-                            Text('Phone: ${customer['phone'] ?? 'No phone'}'),
-                            SizedBox(height: 4.0),
-                            Text('Address: ${customer['address'] ?? 'No address'}'),
-                            SizedBox(height: 4.0),
-                            ElevatedButton(
-                              onPressed: () {},
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all(Colors.lightBlueAccent),
-                              ),
-                              child: Text("Email", style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
+              ? Center(
+                  child: Text("No customers available",
+                      style: TextStyle(fontSize: 18)))
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      int crossAxisCount = (constraints.maxWidth / 300).floor();
+                      return GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                              crossAxisCount > 1 ? crossAxisCount : 1,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.6,
                         ),
-                      ),
-                    );
-                  },
+                        itemCount: customerData.length,
+                        itemBuilder: (context, index) {
+                          final customer = customerData[index];
+                          return _buildCustomerCard(customer);
+                        },
+                      );
+                    },
+                  ),
                 ),
+    );
+  }
+
+  Widget _buildCustomerCard(Map<String, dynamic> customer) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.blueAccent,
+                  child: Text(
+                    customer['name']?.substring(0, 1).toUpperCase() ?? '?',
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customer['name'] ?? 'No name',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      customer['email'] ?? 'No email',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            Text('Phone: ${customer['phone'] ?? 'No phone'}',
+                style: TextStyle(fontSize: 14)),
+            Text('Address: ${customer['address'] ?? 'No address'}',
+                style: TextStyle(fontSize: 14)),
+            Spacer(),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightBlueAccent,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                child: Text("Email", style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

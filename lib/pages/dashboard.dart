@@ -25,7 +25,7 @@ class _DashboardState extends State<Dashboard> {
 
   // Initialize secure storage
   final _storage = FlutterSecureStorage();
-   Future<void> _getSales() async {
+  Future<void> _getSales() async {
     // Read business ID from secure storage
     String? businessId = await _storage.read(key: 'business-id');
     print('buisness id $businessId');
@@ -43,7 +43,8 @@ class _DashboardState extends State<Dashboard> {
       if (response.statusCode == 200) {
         setState(() {
           print("Sales data is $response.body");
-          salesData = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+          salesData =
+              List<Map<String, dynamic>>.from(jsonDecode(response.body));
           isLoading = false;
         });
       } else {
@@ -55,9 +56,9 @@ class _DashboardState extends State<Dashboard> {
       setState(() => isLoading = false);
     }
   }
+
   @override
   void initState() {
-
     super.initState();
     _getSales();
   }
@@ -72,7 +73,9 @@ class _DashboardState extends State<Dashboard> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(child: Icon(Icons.flash_on)),
+            DrawerHeader(
+              child: Image.asset('assets/images/logo.png'),
+            ),
             ListTile(
               title: Text('Sales'),
               onTap: () {
@@ -111,7 +114,11 @@ class _DashboardState extends State<Dashboard> {
             ),
             // Add the logout button at the bottom
             ListTile(
-              title: Text('Logout'),
+              title: Text(
+                'Logout',
+                style: TextStyle(color: Colors.white),
+              ),
+              tileColor: Colors.red,
               onTap: () async {
                 final storage = FlutterSecureStorage();
 
@@ -130,12 +137,14 @@ class _DashboardState extends State<Dashboard> {
           ],
         ),
       ),
-      body: salesData.isEmpty ? Center(child: Text("No data found")) : SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [LineChartGraph(), CircularChart()],
-        ),
-      ),
+      body: salesData.isEmpty
+          ? Center(child: Text("No data found"))
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [LineChartGraph(), CircularChart()],
+              ),
+            ),
     );
   }
 }
