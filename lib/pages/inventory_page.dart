@@ -16,35 +16,12 @@ class _InventoryPageState extends State<InventoryPage> {
   List<Map<String, dynamic>> items = [];
   bool isLoading = true;
 
-  // Add product method
-  Future<void> addProduct(String itemName, int quantity, int price, String supplier) async {
-    String? businessId = await _storage.read(key: 'business-id');
-    if (businessId == null) {
-      print("Business ID not found");
-      return;
-    }
-    
-    final url = Uri.parse('$baseurl/inventory/add-product');
-    final response = await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'item_name': itemName,
-          'quantity': quantity,
-          'price': price,
-          'supplier': supplier,
-          'business_id': int.parse(businessId),
-        }));
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Product added successfully")),
-      );
-      _getInventoryItems();
-    } else {
-      print("Failed to add product");
-    }
+  @override
+  void initState() {
+    super.initState();
+    _getInventoryItems();
   }
 
-  // Fetch inventory items from the API
   Future<void> _getInventoryItems() async {
     String? businessId = await _storage.read(key: 'business-id');
     if (businessId == null) {
@@ -70,39 +47,76 @@ class _InventoryPageState extends State<InventoryPage> {
     }
   }
 
-  // Show the dialog to add a new product
+  Future<void> addProduct(String itemName, int quantity, int price, String supplier, String category) async {
+    String? businessId = await _storage.read(key: 'business-id');
+    if (businessId == null) {
+      print("Business ID not found");
+      return;
+    }
+
+    final url = Uri.parse('$baseurl/inventory/add-product');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'item_name': itemName,
+        'quantity': quantity,
+        'price': price,
+        'supplier': supplier,
+        'category': category,
+        'business_id': int.parse(businessId),
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Product added successfully")),
+      );
+      _getInventoryItems();
+    } else {
+      print("Failed to add product: ${response.body}");
+    }
+  }
+
   void _showAddProductDialog() {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController quantityController = TextEditingController();
     final TextEditingController priceController = TextEditingController();
     final TextEditingController supplierController = TextEditingController();
+    final TextEditingController categoryController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Add Product"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: "Item Name"),
-            ),
-            TextField(
-              controller: quantityController,
-              decoration: InputDecoration(labelText: "Quantity"),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: priceController,
-              decoration: InputDecoration(labelText: "Price"),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: supplierController,
-              decoration: InputDecoration(labelText: "Supplier"),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: "Item Name"),
+              ),
+              TextField(
+                controller: quantityController,
+                decoration: InputDecoration(labelText: "Quantity"),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: priceController,
+                decoration: InputDecoration(labelText: "Price"),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: supplierController,
+                decoration: InputDecoration(labelText: "Supplier"),
+              ),
+              TextField(
+                controller: categoryController,
+                decoration: InputDecoration(labelText: "Category"),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -116,6 +130,7 @@ class _InventoryPageState extends State<InventoryPage> {
                 int.tryParse(quantityController.text) ?? 0,
                 int.tryParse(priceController.text) ?? 0,
                 supplierController.text,
+                categoryController.text,
               );
               Navigator.pop(context);
             },
@@ -126,56 +141,75 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _getInventoryItems();
+  Map<String, List<Map<String, dynamic>>> _groupItemsByCategory() {
+    Map<String, List<Map<String, dynamic>>> categorizedItems = {};
+    for (var item in items) {
+      final category = item['category'] ?? 'Uncategorized';
+      if (!categorizedItems.containsKey(category)) {
+        categorizedItems[category] = [];
+      }
+      categorizedItems[category]!.add(item);
+    }
+    return categorizedItems;
   }
 
   @override
   Widget build(BuildContext context) {
+    final categorizedItems = _groupItemsByCategory();
+
     return Scaffold(
-      appBar: AppBar(title: Text("Inventory")),
+      appBar: AppBar(
+        title: Text("Inventory"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : items.isEmpty
-              ? Center(child: Text("Inventory is empty", style: TextStyle(fontSize: 18)))
-              : ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    return Card(
-                      margin: EdgeInsets.all(10),
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['item_name'] ?? 'No Name',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                Text('Quantity: ${item['quantity']}'),
-                                SizedBox(height: 5),
-                                Text('Price: \$${item['price']}'),
-                                SizedBox(height: 5),
-                                Text('Supplier: ${item['supplier']}'),
-                              ],
-                            ),
-                          ],
+          ? Center(child: Text("Inventory is empty", style: TextStyle(fontSize: 18)))
+          : ListView(
+        children: categorizedItems.entries.map((entry) {
+          return ExpansionTile(
+            title: Text(
+              entry.key,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: entry.value.map((item) {
+              return Container(
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['item_name'] ?? 'No Name',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                        SizedBox(height: 8),
+                        Text('Quantity: ${item['quantity']}'),
+                        SizedBox(height: 4),
+                        Text('Price: \$${item['price']}'),
+                        SizedBox(height: 4),
+                        Text('Supplier: ${item['supplier']}'),
+                      ],
+                    ),
+                  ),
                 ),
+              );
+            }).toList(),
+          );
+        }).toList(),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddProductDialog,
         child: Icon(Icons.add),

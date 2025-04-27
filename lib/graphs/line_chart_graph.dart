@@ -74,7 +74,7 @@ class _LineChartGraphState extends State<LineChartGraph> {
                       width: 27,
                       height: 13,
                       decoration: BoxDecoration(
-                        color: Color(0xFF7209B7),
+                        color: Colors.blue.shade500,
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
@@ -113,7 +113,7 @@ class _LineChartGraphState extends State<LineChartGraph> {
                       ),
                       dataSource: chartData,
                       width: 0.5,
-                      color: Color(0xFF7209B7),
+                      color: Colors.blue.shade500,
                       xValueMapper: (ChartColumnData data, _) => data.x,
                       yValueMapper: (ChartColumnData data, _) => data.y1,
                     ),
@@ -139,11 +139,11 @@ class _LineChartGraphState extends State<LineChartGraph> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        "5",
+                        "12",
                         style: TextStyle(
                           fontSize: 28,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFF72585),
+                          fontWeight: FontWeight.w800,
+                          color: Colors.orange.shade600,
                         ),
                       ),
                     ],
@@ -165,11 +165,11 @@ class _LineChartGraphState extends State<LineChartGraph> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        "15",
+                        "20",
                         style: TextStyle(
                           fontSize: 28,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFFF72585),
+                          fontWeight: FontWeight.w900,
+                          color: Colors.orange.shade600,
                         ),
                       ),
                     ],

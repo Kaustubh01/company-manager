@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class SalesPage extends StatefulWidget {
   const SalesPage({super.key});
@@ -21,9 +24,7 @@ class _SalesPageState extends State<SalesPage> {
 
   // Fetch sales data from the API
   Future<void> _getSales() async {
-    // Read business ID from secure storage
     String? businessId = await _storage.read(key: 'business-id');
-    print('buisness id $businessId');
     if (businessId == null) {
       print("Business ID is not available in secure storage.");
       setState(() {
@@ -37,7 +38,6 @@ class _SalesPageState extends State<SalesPage> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         setState(() {
-          print("Sales data is $response.body");
           salesData = List<Map<String, dynamic>>.from(jsonDecode(response.body));
           isLoading = false;
         });
@@ -78,28 +78,70 @@ class _SalesPageState extends State<SalesPage> {
     ]);
   }
 
+  Future<void> _exportSalesDataToPDF() async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Column(
+            children: [
+              pw.Text('Sales Data', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 20),
+              pw.Table.fromTextArray(
+                headers: ['Sale ID', 'Customer Name', 'Item Name', 'Quantity Sold', 'Sale Date', 'Total Price'],
+                data: salesData.map((sale) => [
+                  sale['sale_id'].toString(),
+                  sale['customerName'] ?? 'N/A',
+                  sale['itemName'] ?? 'N/A',
+                  sale['quantitySold'].toString(),
+                  formatDate(sale['saleDate']),
+                  sale['totalPrice'].toString(),
+                ]).toList(),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    // Preview, Print or Share the generated PDF
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sales Data")),
+      appBar: AppBar(
+        title: const Text("Sales Data"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : salesData.isEmpty
-              ? const Center(child: Text("No sales data available", style: TextStyle(fontSize: 18)))
-              : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    columns: const [
-                      DataColumn(label: Text("Sale ID")),
-                      DataColumn(label: Text("Customer Name")),
-                      DataColumn(label: Text("Item Name")),
-                      DataColumn(label: Text("Quantity Sold")),
-                      DataColumn(label: Text("Sale Date")),
-                      DataColumn(label: Text("Total Price")),
-                    ],
-                    rows: salesData.map(buildDataRow).toList(),
-                  ),
-                ),
+          ? const Center(child: Text("No sales data available", style: TextStyle(fontSize: 18)))
+          : SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: const [
+            DataColumn(label: Text("Sale ID")),
+            DataColumn(label: Text("Customer Name")),
+            DataColumn(label: Text("Item Name")),
+            DataColumn(label: Text("Quantity Sold")),
+            DataColumn(label: Text("Sale Date")),
+            DataColumn(label: Text("Total Price")),
+          ],
+          rows: salesData.map(buildDataRow).toList(),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _exportSalesDataToPDF,
+        child: const Icon(Icons.picture_as_pdf),
+        backgroundColor: Colors.orange.shade600,
+      ),
     );
   }
 }

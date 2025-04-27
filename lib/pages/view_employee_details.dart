@@ -14,7 +14,6 @@ class ViewEmployeeDetails extends StatefulWidget {
 }
 
 class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
-  
   final FlutterSecureStorage _storage = FlutterSecureStorage();
   Map<String, dynamic>? employee;
   bool isLoading = true;
@@ -25,7 +24,7 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
   void initState() {
     super.initState();
     _getEmployee(widget.id);
-    _getTasks(widget.id); // Fetch tasks when the employee details are loaded
+    _getTasks(widget.id);
   }
 
   Future<void> _getTasks(int id) async {
@@ -49,7 +48,7 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
     final url = Uri.parse('$baseurl/business/$businessId/employees/search-id?id=$id');
     try {
       final response =
-          await http.get(url, headers: {'Content-Type': 'application/json'});
+      await http.get(url, headers: {'Content-Type': 'application/json'});
 
       if (response.statusCode == 200) {
         setState(() {
@@ -120,7 +119,6 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
                   if (newSalary != null) {
                     Navigator.of(context).pop(newSalary);
                   } else {
-                    // Validation
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Please enter a valid salary")));
                   }
@@ -130,6 +128,31 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
         );
       },
     );
+  }
+
+  Future<void> _updateTaskStatus(int taskId, String status) async {
+    final url = Uri.parse('$baseurl/tasks/update-status');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'taskId': taskId, 'status': status}),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Task status updated to "$status"')),
+        );
+        // Refresh the tasks list after updating the status
+        await _getTasks(widget.id);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update task status')),
+        );
+      }
+    } catch (e) {
+      print("Error updating task status: $e");
+    }
   }
 
   void _showTaskDialog(BuildContext context) {
@@ -169,7 +192,7 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
                     );
                     if (pickedDate != null) {
                       String formattedDate =
-                          DateFormat("yyyy-MM-ddTHH:mm:ss").format(pickedDate);
+                      DateFormat("yyyy-MM-ddTHH:mm:ss").format(pickedDate);
                       dueDateController.text = formattedDate;
                     }
                   },
@@ -189,11 +212,8 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
                     String dueDate = dueDateController.text;
 
                     if (dueDate.isNotEmpty) {
-                      DateTime parsedDate =
-                          DateTime.parse(dueDate);
-                      dueDate = parsedDate
-                          .toUtc()
-                          .toIso8601String();
+                      DateTime parsedDate = DateTime.parse(dueDate);
+                      dueDate = parsedDate.toUtc().toIso8601String();
                     }
 
                     final url = Uri.parse('$baseurl/tasks');
@@ -212,8 +232,8 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
                     );
 
                     if (response.statusCode == 201) {
-                      print('task created succesfully');
-                      _getTasks(widget.id);  // Refresh task list
+                      print('task created successfully');
+                      _getTasks(widget.id);
                     } else {
                       print('failed to create task');
                     }
@@ -229,131 +249,145 @@ class _ViewEmployeeDetailsState extends State<ViewEmployeeDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Employee Details")),
+      appBar: AppBar(
+        title: const Text("Employee Details"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,
+      ),
       body: Center(
         child: isLoading
             ? const CircularProgressIndicator()
             : hasError || employee == null
-                ? const Text("Failed to load employee details.")
-                : _buildEmployeeDetails(),
+            ? const Text("Failed to load employee details.")
+            : _buildEmployeeDetails(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showTaskDialog(context);
         },
-        child: Icon(Icons.add_task),
+        backgroundColor: Colors.blue.shade500,
+        child: Icon(Icons.add_task, color: Colors.white),
       ),
     );
   }
 
   Widget _buildEmployeeDetails() {
     String lastAttendance = employee!["lastAttendanceRecorded"] ?? "";
-
-    DateTime serverDate = DateTime.parse(lastAttendance);
+    DateTime serverDate = DateTime.tryParse(lastAttendance) ?? DateTime(2000);
     String serverDateFormatted = DateFormat('yyyy-MM-dd').format(serverDate);
-
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
     bool isPresentToday = serverDateFormatted == today;
 
-    return Card(
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      employee!["name"],
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(employee!["role"],
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey)),
-                    const SizedBox(height: 4),
-                    Text(employee!["email"],
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.grey)),
-                  ],
-                ),
-                CircleAvatar(
-                  radius: 10,
-                  backgroundColor: isPresentToday ? Colors.green : Colors.red,
-                ),
-              ],
-            ),
-            const Divider(height: 20, thickness: 1),
-            ListTile(
-              title: const Text("Salary"),
-              subtitle: Text(employee!["salary"].toString()),
-              leading: const Icon(Icons.attach_money, color: Colors.green),
-              onTap: () async {
-                double? newSalary = await _showSalaryUpdateDialog();
-                if (newSalary != null) {
-                  _updateSalary(newSalary);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text("Attendance"),
-              subtitle: Text(employee!["attendance"].toString()),
-              leading: const Icon(Icons.calendar_today, color: Colors.blue),
-              onTap: () {},
-            ),
-            Text("Tasks", style: TextStyle(fontSize: 18),),
-            const Divider(height: 20, thickness: 1), // Divider before tasks
-            if (tasks.isEmpty)
-              const Text("No tasks available.")
-            else
-              ...tasks.map((task) => ListTile(
-                    title: Text(task["title"]),
-                    leading: const Icon(Icons.task),
-                    onTap: (){
-                      showDialog(context: context, builder: (context){
-                        return AlertDialog(
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Title: ${task["title"]}",
-                                        style: TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text("${task["description"]}"),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        "Due Date: ${task["dueDate"] ?? "None"}",
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text("Status: ${task["status"]}"),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(employee!["name"],
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(employee!["role"],
+                      style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                  const SizedBox(height: 4),
+                  Text(employee!["email"],
+                      style: const TextStyle(fontSize: 14, color: Colors.black54)),
+                ],
+              ),
+              CircleAvatar(
+                radius: 10,
+                backgroundColor: isPresentToday ? Colors.green : Colors.red,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(thickness: 1),
+          ListTile(
+            leading: const Icon(Icons.attach_money, color: Colors.green),
+            title: const Text("Salary"),
+            subtitle: Text(employee!["salary"].toString()),
+            onTap: () async {
+              double? newSalary = await _showSalaryUpdateDialog();
+              if (newSalary != null) {
+                _updateSalary(newSalary);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.task_alt, color: Colors.pink),
+            title: const Text("Completed Tasks"),
+            subtitle: Text(tasks.where((t) => t["status"] == "completed").length.toString()),
+          ),
+          ListTile(
+            leading: const Icon(Icons.assignment_turned_in, color: Colors.purple),
+            title: const Text("Assigned Tasks"),
+            subtitle: Text(tasks.length.toString()),
+          ),
+          ListTile(
+            leading: const Icon(Icons.calendar_today, color: Colors.blue),
+            title: const Text("Attendance"),
+            subtitle: Text(employee!["attendance"].toString()),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home_work, color: Colors.red),
+            title: const Text("Total Leaves"),
+            subtitle: Text(employee!["leaves"].toString()),
+          ),
+          const SizedBox(height: 16),
+          const Text("Tasks", style: TextStyle(fontSize: 18)),
+          const Divider(thickness: 1),
+          if (tasks.isEmpty)
+            const Text("No tasks available.")
+          else
+            ...tasks.map((task) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                title: Text(task["title"]),
+                leading: const Icon(Icons.task),
+                subtitle: Text("Status: ${task["status"]}"),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Title: ${task["title"]}",
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 8),
+                          Text(task["description"] ?? ""),
+                          const SizedBox(height: 8),
+                          Text("Due Date: ${task["dueDate"] ?? "None"}"),
+                          const SizedBox(height: 8),
+                          Text("Assigned On: ${task["assignedOn"] ?? "None"}"),
+                        ],
+                      ),
+                      actions: [
+                        if (task["status"] != "COMPLETED")
+                          TextButton(
+                            onPressed: () {
+                              _updateTaskStatus(task["id"], "COMPLETED");
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Mark as Completed"),
                           ),
-                        );
-                      });
-                    },
-                  )),
-          ],
-        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cancel"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            )),
+        ],
       ),
     );
   }

@@ -58,7 +58,11 @@ class _CustomerPageState extends State<CustomerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Customers")),
+      appBar: AppBar(
+        title: Text("Customers"),
+        backgroundColor: Colors.orange.shade600,
+        foregroundColor: Colors.white,  
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : customerData.isEmpty
